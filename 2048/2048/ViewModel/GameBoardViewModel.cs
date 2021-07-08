@@ -1,4 +1,5 @@
 ﻿using _2048.Helper;
+using _2048.Helpers;
 using _2048.Model;
 using Prism.Commands;
 using System;
@@ -48,8 +49,10 @@ namespace _2048.ViewModel
 
       set
       {
+        if (value <= _nextTile) return;
         if (_nextTile == value) return;
         _nextTile = value;
+        AppConfigManager.Set("NextTile", value.ToString());
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("NextTile"));
       }
     }
@@ -63,7 +66,10 @@ namespace _2048.ViewModel
         if (_score == value) return;
         _score = value;
         if (Score > BestScore)
+        {
           BestScore = Score;
+          AppConfigManager.Set("BestScore", value.ToString());
+        }
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Score"));
       }
     }
@@ -78,10 +84,13 @@ namespace _2048.ViewModel
     private int _score;
     private int _bestScore;
     private int _nextTile = 4;
+    private bool squareMoved = false;
 
     public GameBoardViewModel()
     {
       NewGameCommand = new DelegateCommand(NewGameCommandExecute);
+      BestScore= int.Parse(AppConfigManager.Get("BestScore"));
+      NextTile= int.Parse(AppConfigManager.Get("NextTile"));
       InitializeBoard();
     }
 
@@ -109,6 +118,7 @@ namespace _2048.ViewModel
       }
 
       Random random = new Random();
+      squareMoved = true;
       PlaceSquare(random);
       PlaceSquare(random);
 
@@ -117,6 +127,10 @@ namespace _2048.ViewModel
 
     public void PlaceSquare(Random random)
     {
+      if (!squareMoved)
+      {
+        return;
+      }
       var emptyPlaces = getListOfEmptyPlaces();
       if (!emptyPlaces.Any())
       {
@@ -127,6 +141,7 @@ namespace _2048.ViewModel
       var element = emptyPlaces[randomPlace];
       matrix[element / 10][element % 10] = colorMapper.ColorMapping[random.Next(2) * 2 + 2];
       emptyPlaces.Remove(element);
+      squareMoved = false;
     }
 
     private List<int> getListOfEmptyPlaces()
@@ -153,7 +168,7 @@ namespace _2048.ViewModel
       Score += addition;
       if (addition >= NextTile)
       {
-        NextTile = addition * 2 ;
+        NextTile = addition * 2;
       }
     }
 
@@ -200,6 +215,7 @@ namespace _2048.ViewModel
               CheckIfBestScore(addition);
               matrix[line][column] = colorMapper.ColorMapping[addition];
               matrix[line][auxColumn] = new Square();
+              squareMoved = true;
               column--;
             }
             else if (matrix[line][column].Number != null && matrix[line][auxColumn].Number != null)
@@ -225,6 +241,7 @@ namespace _2048.ViewModel
             {
               matrix[line][column] = colorMapper.ColorMapping[int.Parse(matrix[line][auxColumn].Number)];
               matrix[line][auxColumn] = new Square();
+              squareMoved = true;
               break;
             }
             auxColumn--;
@@ -250,6 +267,7 @@ namespace _2048.ViewModel
               CheckIfBestScore(addition);
               matrix[line][column] = colorMapper.ColorMapping[addition];
               matrix[line][auxColumn] = new Square();
+              squareMoved = true;
               column++;
             }
             else if (matrix[line][column].Number != null && matrix[line][auxColumn].Number != null)
@@ -275,6 +293,7 @@ namespace _2048.ViewModel
             {
               matrix[line][column] = colorMapper.ColorMapping[int.Parse(matrix[line][auxColumn].Number)];
               matrix[line][auxColumn] = new Square();
+              squareMoved = true;
               break;
             }
 
@@ -302,6 +321,7 @@ namespace _2048.ViewModel
               CheckIfBestScore(addition);
               matrix[line][column] = colorMapper.ColorMapping[addition];
               matrix[auxLine][column] = new Square();
+              squareMoved = true;
               line++;
             }
             else if (matrix[line][column].Number != null && matrix[auxLine][column].Number != null)
@@ -328,6 +348,7 @@ namespace _2048.ViewModel
             {
               matrix[line][column] = colorMapper.ColorMapping[int.Parse(matrix[auxLine][column].Number)];
               matrix[auxLine][column] = new Square();
+              squareMoved = true;
               break;
             }
 
@@ -353,6 +374,7 @@ namespace _2048.ViewModel
             {
               matrix[line][column] = colorMapper.ColorMapping[int.Parse(matrix[auxLine][column].Number)];
               matrix[auxLine][column] = new Square();
+              squareMoved = true;
               break;
             }
 
@@ -380,6 +402,7 @@ namespace _2048.ViewModel
               CheckIfBestScore(addition);
               matrix[line][column] = colorMapper.ColorMapping[addition];
               matrix[auxLine][column] = new Square();
+              squareMoved = true;
               line--;
             }
             else if (matrix[line][column].Number != null && matrix[auxLine][column].Number != null)

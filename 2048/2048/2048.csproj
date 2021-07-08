@@ -50,6 +50,7 @@
       <HintPath>..\packages\Prism.Core.8.1.97\lib\net47\Prism.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -70,6 +71,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Constants\ColorConstants.cs" />
+    <Compile Include="Helper\AppConfigManager.cs" />
     <Compile Include="Helper\ColorMapper.cs" />
     <Compile Include="Model\Square.cs" />
     <Compile Include="ViewModel\GameBoardViewModel.cs" />
